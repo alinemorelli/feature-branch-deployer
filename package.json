@@ -1,0 +1,38 @@
+{
+  "name": "feature-branch-deployer",
+  "version": "0.0.1",
+  "description": "Package to create a test branch based on Aliança Hospitalar flow",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "featureBranch": "./bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alianca-hospitalar/feature-branch-deployer"
+  },
+  "author": {
+    "name": "Aliança Hospitalar",
+    "email": "tecnologia@aliancahospitalar.com",
+    "url": "https://github.com/alianca-hospitalar"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alianca-hospitalar/feature-branch-deployer/issues"
+  },
+  "keywords": [
+    "feature branch",
+    "git flow",
+    "deploy"
+  ],
+  "devDependencies": {
+    "standard": "^12.0.1"
+  },
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "commander": "^2.19.0"
+  }
+}
