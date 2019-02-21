@@ -28,8 +28,12 @@ const mergeBranchs = async function (branchName) {
         await exec(`git merge --abort`)
         throw new Error(chalk.bold.red(`CONFLICT: resolve before merge`))
       }
+      console.log(chalk.bold.cyan('Creating tag testing'))
+      await exec(`git tag -a -f testing -m qa`)
       console.log(chalk.bold.cyan(`Pushing branch qa__${branchName}`))
       await exec(`git push origin qa__${branchName}`)
+      console.log(chalk.bold.cyan('Pushing tag testing'))
+      await exec(`git push origin -f refs/tags/testing`)
       resolve()
     })
   })
@@ -39,6 +43,7 @@ program
   .command('deploy <baseBranch> <featureBranch>')
   .description('Create a new branch using baseBranch and featureBranch named qa__<featureBranch> and send it to origin')
   .action(async function deploy (baseBranch, featureBranch) {
+    await exec('git fetch -p')
     await checkoutAndUpdate(featureBranch)
     await checkoutAndUpdate(baseBranch)
     await exec(`git checkout -B qa__${featureBranch}`)
@@ -50,8 +55,12 @@ program
   .description('Remove branch previously created for test purposes')
   .action(async function remove (featureBranch) {
     exec(`git remote show origin | grep "HEAD branch" | cut -d ":" -f 2`, async (_, mainBranch) => {
-      console.log(`Deleting branch qa__${featureBranch}`)
+      console.log(`Deleting tag testing`)
       await exec(`git checkout${mainBranch}`)
+      exec(`git push --delete origin testing`, (err) => {
+        if (err) console.log(chalk.bold.red(`Tag testing not found`))
+      })
+      console.log(`Deleting branch qa__${featureBranch}`)
       exec(`git branch -D qa__${featureBranch} && git push origin --delete qa__${featureBranch}`, (err) => {
         if (err) console.log(chalk.bold.red(`Branch qa__${featureBranch} not found`))
       })
