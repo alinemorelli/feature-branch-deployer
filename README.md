@@ -29,6 +29,6 @@ It will generate a branch with the name qa__<featureBranch> and push to your ori
 After testing the feature you can delete the test branch from your repository
 
 ```bash
-featureBranch delete <featureBranch>
+featureBranch remove <featureBranch>
 ```
 It will remove the branch named qa__<featureBranch> from remote and origin.
