@@ -9,6 +9,15 @@ const chalk = require('chalk')
 
 program.version(pkg.version)
 
+const createTagQa = async function (branchName = '') {
+  console.log(chalk.bold.cyan('Creating tag testing'))
+  await exec(`git tag -a -f testing -m qa`)
+  console.log(chalk.bold.cyan(`Pushing branch qa__${branchName}`))
+  await exec(`git push origin -f qa__${branchName}`)
+  console.log(chalk.bold.cyan('Pushing tag testing'))
+  return exec(`git push origin -f refs/tags/testing`)
+}
+
 const checkoutAndUpdate = async function (branchName) {
   console.log(chalk.bold.cyan(`Updating branch ${branchName}`))
   return new Promise((resolve) => {
@@ -28,12 +37,7 @@ const mergeBranchs = async function (branchName) {
         await exec(`git merge --abort`)
         throw new Error(chalk.bold.red(`CONFLICT: resolve before merge`))
       }
-      console.log(chalk.bold.cyan('Creating tag testing'))
-      await exec(`git tag -a -f testing -m qa`)
-      console.log(chalk.bold.cyan(`Pushing branch qa__${branchName}`))
-      await exec(`git push origin qa__${branchName}`)
-      console.log(chalk.bold.cyan('Pushing tag testing'))
-      await exec(`git push origin -f refs/tags/testing`)
+      await createTagQa(branchName)
       resolve()
     })
   })
@@ -65,6 +69,18 @@ program
         if (err) console.log(chalk.bold.red(`Branch qa__${featureBranch} not found`))
       })
     })
+  })
+
+program
+  .command('clear')
+  .description('Create a new branch using dev branch named qa__ and send it to origin')
+  .action(async function deploy () {
+    console.log(`Updating branchs`)
+    await exec('git fetch -p')
+    console.log(`Creating testing branch`)
+    await checkoutAndUpdate('dev')
+    await exec(`git checkout -B qa__`)
+    return createTagQa()
   })
 
 program.parse(process.argv)
