@@ -6,16 +6,15 @@ const pkg = require('../package.json')
 const { promisify } = require('util')
 const exec = promisify(require('child_process').exec)
 const chalk = require('chalk')
+const configEnvs = require('./config')
 
 program.version(pkg.version)
 
-const createTagQa = async function (branchName = '') {
-  console.log(chalk.bold.cyan('Creating tag testing'))
-  await exec(`git tag -a -f testing -m qa`)
-  console.log(chalk.bold.cyan(`Pushing branch qa__${branchName}`))
-  await exec(`git push origin -f qa__${branchName}`)
-  console.log(chalk.bold.cyan('Pushing tag testing'))
-  return exec(`git push origin -f refs/tags/testing`)
+const createTag = async function (tagName) {
+  console.log(chalk.bold.cyan(`Creating tag ${tagName}`))
+  await exec(`git tag -a -f ${tagName} -m qa`)
+  console.log(chalk.bold.cyan(`Pushing tag ${tagName}`))
+  return exec(`git push origin -f refs/tags/${tagName}`)
 }
 
 const checkoutAndUpdate = async function (branchName) {
@@ -37,16 +36,18 @@ const mergeBranchs = async function (branchName) {
         await exec(`git merge --abort`)
         throw new Error(chalk.bold.red(`CONFLICT: resolve before merge`))
       }
-      await createTagQa(branchName)
+      console.log(chalk.bold.cyan(`Pushing branch qa__${branchName}`))
+      await exec(`git push origin -f qa__${branchName}`)
+      await createTag('testing')
       resolve()
     })
   })
 }
 
 program
-  .command('deploy <baseBranch> <featureBranch>')
+  .command('test <baseBranch> <featureBranch>')
   .description('Create a new branch using baseBranch and featureBranch named qa__<featureBranch> and send it to origin')
-  .action(async function deploy (baseBranch, featureBranch) {
+  .action(async function test (baseBranch, featureBranch) {
     await exec(`git branch -D ${featureBranch}`)
     await exec('git fetch -p')
     await checkoutAndUpdate(featureBranch)
@@ -81,7 +82,19 @@ program
     console.log(`Creating testing branch`)
     await checkoutAndUpdate('dev')
     await exec(`git checkout -B qa__`)
-    return createTagQa()
+    console.log(chalk.bold.cyan(`Pushing branch qa__`))
+    await exec(`git push origin -f qa__`)
+    return createTag('testing')
   })
 
+program
+  .command('deploy')
+  .description('Move tag to last commit off production/dev branch to deploy it')
+  .option('-e, --environment [env]', 'Specifies the environment to deploy (production/homolog)')
+  .action(async function deploy (options) {
+    if (!options.environment) return console.log(chalk.bold.red(`You must specify the environment to deploy`))
+    const config = configEnvs[options.environment]
+    await checkoutAndUpdate(config.branch)
+    await createTag(config.tag)
+  })
 program.parse(process.argv)

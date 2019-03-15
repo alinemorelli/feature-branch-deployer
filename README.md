@@ -21,7 +21,7 @@ All commands listed before should be executed on your repository path
 You can create a new branch based on your development branch and add the branch of the feature to be tested to it.
 
 ```bash
-featureBranch deploy <baseBranch> <featureBranch>
+featureBranch test <baseBranch> <featureBranch>
 ```
 It will generate a branch with the name qa__{featureBranch}, a tag 'testing' and push to your origin.
 
@@ -44,3 +44,14 @@ After testing the feature you can create a new branch to clear your qa environme
 featureBranch clear
 ```
 It will create a branch named qa__based on branch dev, a tag 'testing' and pushto your origin.
+
+##### Create a tag (prod/stag) to deploy (production/homolog) environment
+After testing the feature you can deploy all your features to homolog or production 
+
+Possible values in the environment option: `production` or `homolog`
+
+```bash
+featureBranch deploy -e <environment>
+```
+
+It will checkout to branch (production or dev) and create a tag (prod or stag) based on your environment option
