@@ -1,6 +1,6 @@
 {
   "name": "feature-branch-deployer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Package to create a test branch based on Aliança Hospitalar flow",
   "main": "index.js",
   "scripts": {

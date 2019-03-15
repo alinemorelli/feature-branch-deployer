@@ -47,6 +47,7 @@ program
   .command('deploy <baseBranch> <featureBranch>')
   .description('Create a new branch using baseBranch and featureBranch named qa__<featureBranch> and send it to origin')
   .action(async function deploy (baseBranch, featureBranch) {
+    await exec(`git branch -D ${featureBranch}`)
     await exec('git fetch -p')
     await checkoutAndUpdate(featureBranch)
     await checkoutAndUpdate(baseBranch)
@@ -74,7 +75,7 @@ program
 program
   .command('clear')
   .description('Create a new branch using dev branch named qa__ and send it to origin')
-  .action(async function deploy () {
+  .action(async function clear () {
     console.log(`Updating branchs`)
     await exec('git fetch -p')
     console.log(`Creating testing branch`)
